@@ -69,6 +69,13 @@ The quiz is a single-session experience with no authentication or historical tra
 
 ---
 
+## 🔌 API Reference
+The backend exposes a single optimized endpoint:
+
+`GET /api/quiz`
+- **Returns:** A JSON object containing 15 sanitized questions.
+- **Structure:** `{ "questions": [ { "question": "...", "choices": [...], "correct_answer": "..." } ] }`
+
 ## 🧪 Testing Strategy
 
 - **Backend:** Unit tests validate API contracts, schema parsing, and data sanitization
