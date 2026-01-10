@@ -72,9 +72,10 @@ export default function Home() {
       // 3. Navigate to quiz interface
       router.push("/quiz");
 
-    } catch (err) {
+    } catch (err: any) {
       // User-friendly error message if backend is unavailable
-      setError("Failed to start quiz. Check backend connection.");
+      const message = err.message || "Failed to start quiz. Please check your connection and try again.";
+      setError(message);
       setLoading(false); // Only stop loading on error (otherwise keep it for transition)
     } 
   };
