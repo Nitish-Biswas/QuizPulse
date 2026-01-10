@@ -155,23 +155,21 @@ export default function ReportPage() {
 
                   <div className="flex-grow">
                     <h3
-                      className="text-lg font-medium text-gray-800 mb-3"
+                      className="text-lg font-medium text-gray-800 mb-4"
                       dangerouslySetInnerHTML={{ __html: q.question }}
                     />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       {/* User Answer */}
-                      <div className={`p-3 rounded-lg border ${
+                      <div className={`p-4 rounded-lg border-l-4 ${
                           isCorrect
-                            ? "bg-green-50 border-green-200"
-                            : "bg-red-50 border-red-200"
+                            ? "bg-green-50 border-green-500 border-y border-r border-y-green-100 border-r-green-100" 
+                            : "bg-red-50 border-red-500 border-y border-r border-y-red-100 border-r-red-100"
                       }`}>
-                        <span className="block text-xs font-bold uppercase mb-1 opacity-70">
+                        <span className="block text-xs font-bold uppercase text-gray-500 mb-1">
                           Your Answer
                         </span>
-                        <span className={`font-semibold ${
-                          isCorrect ? "text-green-800" : "text-red-800"
-                        }`}>
+                        <span className="text-lg font-bold text-gray-900">
                           {userAnswer || "(Skipped)"}
                         </span>
                       </div>
