@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Client-side navigation after quiz initialization
 import { fetchQuiz } from "@/lib/api";
 import { useQuizStore } from "@/store/quizStore"; // Centralized quiz state management
@@ -24,6 +24,21 @@ export default function Home() {
   // ---- Zustand Actions ----
   const setQuestions = useQuizStore((state) => state.setQuestions);
   const startQuiz = useQuizStore((state) => state.startQuiz);
+
+  // Check State
+  const storedEmail = useQuizStore((state) => state.email);
+  const isFinished = useQuizStore((state) => state.isFinished);
+  const timeLeft = useQuizStore((state) => state.timeLeft);
+
+  // 1. SESSION RECOVERY CHECK
+  // If user refreshes, this runs on mount. 
+  useEffect(() => {
+    // If we have an email AND time is left AND not finished -> Go back to Quiz
+    if (storedEmail && timeLeft > 0 && !isFinished) {
+      router.push("/quiz");
+    }
+  }, [storedEmail, timeLeft, isFinished, router]);
+
 
   /**
    * Handler for the "Start Quiz" form submission.
@@ -63,6 +78,9 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  // Prevent hydration mismatch by returning null until check is done? 
+  // For this simple app, rendering the form is fine, the useEffect will redirect fast.
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
