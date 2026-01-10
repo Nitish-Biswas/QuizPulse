@@ -23,6 +23,7 @@ export default function QuizPage() {
   // Local UI State
   // Used only to provide submit feedback and prevent double submission
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // ---- Global Quiz State ----
   const questions = useQuizStore((state) => state.questions);
@@ -30,16 +31,29 @@ export default function QuizPage() {
   const submitQuiz = useQuizStore((state) => state.submitQuiz);
   const email = useQuizStore((state) => state.email);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   /**
    * Security Guard:
    * If the user refreshes the page or manually navigates to /quiz
    * without initializing state, redirect back to the start page.
    */
   useEffect(() => {
+    if (!isMounted) return;
+
+    // No Data? -> Go Login
     if (questions.length === 0 || !email) {
-      router.push("/");
+      router.replace("/");
+      return;
     }
-  }, [questions, email, router]);
+
+    // Already Finished? -> Go Report (Block access to quiz)
+    if (isFinished) {
+      router.replace("/report");
+    }
+  }, [isFinished, questions.length, isMounted, router]);
 
   /**
    * Completion Handler:

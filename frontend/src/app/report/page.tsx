@@ -9,6 +9,8 @@ import LoadingOverlay from "@/components/ui/LoadingOverlay";
 export default function ReportPage() {
   const router = useRouter();
 
+  const [isMounted, setIsMounted] = useState(false);
+
   // Track which async action is currently running
   // null = idle | "restart" = restarting quiz | "logout" = logging out
   const [loadingAction, setLoadingAction] =
@@ -18,17 +20,28 @@ export default function ReportPage() {
   const userAnswers = useQuizStore((state) => state.userAnswers);
   const email = useQuizStore((state) => state.email);
   const resetQuiz = useQuizStore((state) => state.resetQuiz);
+  const isFinished = useQuizStore((state) => state.isFinished);
 
   // Needed for restart flow
   const setQuestions = useQuizStore((state) => state.setQuestions);
   const startQuiz = useQuizStore((state) => state.startQuiz);
+  
 
-  // Security: If no data, kick them back to start
   useEffect(() => {
+    if (!isMounted) return;
+
+    // 1. If no data exists at all -> Go to Login
     if (questions.length === 0) {
-      router.push("/");
+      router.replace("/");
+      return;
     }
-  }, [questions, router]);
+
+    // 2. If data exists but quiz is NOT finished -> Go back to Quiz
+    // (This prevents typing /report in URL while taking the quiz)
+    if (!isFinished) {
+      router.replace("/quiz");
+    }
+  }, [isMounted, questions.length, isFinished, router]);
 
   // Calculate Score
   const score = questions.reduce((acc, question, index) => {
