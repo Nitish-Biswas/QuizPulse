@@ -33,7 +33,7 @@ describe('Home Page', () => {
     
     // Check if the main title exists
     const heading = screen.getByRole('heading', { 
-      name: /CausalFunnel/i 
+      name: /QuizPulse/i 
     })
     
     expect(heading).toBeInTheDocument()
