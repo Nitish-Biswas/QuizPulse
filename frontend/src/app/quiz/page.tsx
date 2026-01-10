@@ -56,7 +56,7 @@ export default function QuizPage() {
       {/* HEADER: Assessment Title, Countdown Timer & Manual Submit */}
       <header className="max-w-6xl mx-auto flex justify-between items-center mb-8 sticky top-0 bg-gray-50/90 backdrop-blur pt-4 pb-2 z-10">
         <h1 className="text-xl font-bold hidden md:block text-gray-800">
-          CausalFunnel Assessment
+          QuizPulse
         </h1>
 
         {/* Global quiz timer */}

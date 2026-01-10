@@ -89,11 +89,8 @@ export default function Home() {
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            CausalFunnel
+            QuizPulse
           </h1>
-          <p className="text-gray-500">
-            Software Engineer Intern Assessment
-          </p>
         </div>
 
         {/* Start Quiz Form */}

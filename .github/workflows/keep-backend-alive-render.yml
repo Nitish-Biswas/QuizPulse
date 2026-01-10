@@ -2,8 +2,8 @@ name: Keep Render Awake
 
 on:
   schedule:
-    # Runs every 10 minutes
-    - cron: '*/10 * * * *'
+    # Runs every 5 minutes
+    - cron: "*/5 * * * *"
   workflow_dispatch: # Allows you to run it manually for testing
 
 jobs:
@@ -13,4 +13,4 @@ jobs:
       - name: Ping Health Endpoint
         run: |
           # CHANGE THIS URL to your actual Render URL
-          curl -I https://quizpulse-m1rc.onrender.com/
+          curl -s https://quizpulse-m1rc.onrender.com/health > /dev/null

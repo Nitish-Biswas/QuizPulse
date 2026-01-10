@@ -34,7 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+# Health check endpoint
+@app.get("/health", tags=["Health"])
 def health_check():
     """Simple health check to verify backend is running."""
     return {"status": "ok", "message": "Backend is running"}
