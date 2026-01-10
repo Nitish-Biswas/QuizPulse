@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuizStore } from "@/store/quizStore";
+import { motion, AnimatePresence } from "framer-motion"; // Animation support
 
 /**
  * QuestionCard
@@ -24,25 +25,40 @@ export default function QuestionCard() {
   if (!question) return <div>Loading Question...</div>;
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 max-w-2xl w-full">
+    <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 max-w-2xl w-full overflow-hidden">
       
       {/* Question header & progress indicator */}
       <div className="mb-6">
         <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">
           Question {index + 1} of {questions.length}
         </span>
-        <h2 className="text-xl font-bold text-gray-800 mt-2 leading-relaxed">
-          {question.question}
-        </h2>
+
+        {/* Animated question transition */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={index} // Key change triggers enter/exit animation
+            initial={{ x: 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -50, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h2
+              className="text-xl font-bold text-gray-800 mt-2 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: question.question }}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Answer choices */}
       <div className="flex flex-col gap-3">
-        {question.choices.map((choice, i) => (
-          <button
-            key={i}
+        {question.choices.map((choice) => (
+          <motion.button
+            key={choice} // Stable key for animation consistency
+            whileHover={{ scale: 1.02 }} // Subtle hover feedback
+            whileTap={{ scale: 0.98 }}   // Press interaction feedback
             onClick={() => answerQuestion(index, choice)}
-            className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+            className={`w-full text-left p-4 rounded-xl border-2 transition-colors ${
               // Visually highlight selected answer for clarity and feedback
               selectedAnswer === choice
                 ? "border-blue-600 bg-blue-50 text-blue-800 font-semibold shadow-inner"
@@ -50,7 +66,7 @@ export default function QuestionCard() {
             }`}
           >
             {choice}
-          </button>
+          </motion.button>
         ))}
       </div>
 
