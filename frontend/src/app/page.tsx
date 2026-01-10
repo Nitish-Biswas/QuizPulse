@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Client-side navigation after quiz initialization
 import { fetchQuiz } from "@/lib/api";
 import { useQuizStore } from "@/store/quizStore"; // Centralized quiz state management
+import LoadingOverlay from "@/components/ui/LoadingOverlay"; 
 
 /**
  * The Start Page Component.
@@ -74,9 +75,8 @@ export default function Home() {
     } catch (err) {
       // User-friendly error message if backend is unavailable
       setError("Failed to start quiz. Check backend connection.");
-    } finally {
-      setLoading(false);
-    }
+      setLoading(false); // Only stop loading on error (otherwise keep it for transition)
+    } 
   };
 
   // Prevent hydration mismatch by returning null until check is done? 
@@ -84,6 +84,10 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      
+      {/* Full Screen Loading Overlay */}
+      <LoadingOverlay isVisible={loading} message="Initializing Environment..." />
+
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
         
         {/* Header Section */}
@@ -122,7 +126,7 @@ export default function Home() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
-            {loading ? "Initializing Environment..." : "Start Quiz"}
+            Start Quiz
           </button>
         </form>
 
@@ -130,8 +134,6 @@ export default function Home() {
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-400">
             You will have 30 minutes to answer 15 questions.
-            <br />
-            Do not refresh the page once started.
           </p>
         </div>
       </div>
