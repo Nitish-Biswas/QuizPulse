@@ -58,7 +58,28 @@ Follow these instructions to run the project locally.
 * **Python 3.9+**
 * **Node.js 18+**
 
-### 1. Backend Setup
+### 1. Configuration
+
+The application uses environment variables to manage API endpoints and external service connections. This ensures security and flexibility across different environments (Dev/Staging/Prod).
+
+Create a `.env` file in the `backend/` directory:
+
+```ini
+# backend/.env
+
+# The external third-party API source
+OPENTDB_URL=https://opentdb.com/api.php?amount=15 (api for questions)
+```
+
+Create a `.env.local` file in the `frontend/` directory:
+
+```ini
+# frontend/.env.local
+
+# The URL of your local FastAPI backend
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/quiz (backend api)
+```
+### 2. Backend Setup
 The backend runs on port `8000`.
 
 ```bash
@@ -75,7 +96,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### 1. Frontend Setup
+### 3. Frontend Setup
 The backend runs on port `3000`.
 
 ```bash
@@ -111,15 +132,10 @@ npm test
 
 - **CI Pipeline:** Tests and linters run automatically via GitHub Actions
 
-This ensures the application remains **regression-safe** as features evolve.
+    - This ensures the application remains **regression-safe** as features evolve.
 
 ---
 
-## 🚀 Getting Started
-
-> *(Setup and installation instructions will be added in the next sprint.)*
-
----
 
 ## 💡 Key Engineering Principles Demonstrated
 

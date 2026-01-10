@@ -4,8 +4,11 @@ import random
 from typing import List, Dict, Any
 from fastapi import HTTPException
 from models import QuizQuestion
+import os
+from dotenv import load_dotenv
 
-OPENTDB_URL = "https://opentdb.com/api.php?amount=15"
+load_dotenv()
+OPENTDB_URL = os.getenv("OPENTDB_URL")
 
 def fetch_quiz_data() -> List[QuizQuestion]:
     """

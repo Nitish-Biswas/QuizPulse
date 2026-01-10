@@ -2,7 +2,7 @@ import { QuizResponse } from "@/types/quiz";
 
 // Configuration: URL for the Backend-for-Frontend (BFF).
 // In a production environment, this should be an environment variable (NEXT_PUBLIC_API_URL).
-const API_URL = "http://localhost:8000/api/quiz";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/quiz";
 
 /**
  * Fetches the quiz configuration and questions from the Python Backend.
