@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuizStore } from "@/store/quizStore";
 import Timer from "@/components/Timer";
 import QuestionCard from "@/components/QuestionCard";
 import QuizNavigation from "@/components/QuizNavigation";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 /**
  * QuizPage
@@ -18,6 +19,10 @@ import QuizNavigation from "@/components/QuizNavigation";
  */
 export default function QuizPage() {
   const router = useRouter();
+
+  // Local UI State
+  // Used only to provide submit feedback and prevent double submission
+  const [loading, setLoading] = useState(false);
 
   // ---- Global Quiz State ----
   const questions = useQuizStore((state) => state.questions);
@@ -47,11 +52,26 @@ export default function QuizPage() {
     }
   }, [isFinished, router]);
 
+  /**
+   * Handle manual quiz submission.
+   * Sets a temporary loading state to:
+   * - Prevent multiple clicks
+   * - Give immediate visual feedback
+   */
+  const handleSubmit = () => {
+    setLoading(true);
+    submitQuiz();
+  };
+
   // Prevent UI flash while redirecting unauthorized access
   if (questions.length === 0) return null;
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+
+        {/* Full Screen Loading Overlay */}
+        <LoadingOverlay isVisible={loading} message="Submiting..." />
+        
       
       {/* HEADER: Assessment Title, Countdown Timer & Manual Submit */}
       <header className="max-w-6xl mx-auto flex justify-between items-center mb-8 sticky top-0 bg-gray-50/90 backdrop-blur pt-4 pb-2 z-10">
@@ -62,12 +82,16 @@ export default function QuizPage() {
         {/* Global quiz timer */}
         <Timer />
 
-        {/* Manual submission control */}
+        {/* 
+          Manual submission button.
+          Disabled once clicked to avoid double submission.
+        */}
         <button
-          onClick={submitQuiz}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold transition shadow-md"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Submit Quiz
+            Submit Quiz
         </button>
       </header>
 
