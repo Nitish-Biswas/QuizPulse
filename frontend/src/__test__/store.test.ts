@@ -40,17 +40,31 @@ describe('Quiz Store Logic', () => {
   });
 
   it('should track "Visited" questions but not duplicate them', () => {
-    // Visit Question 1
+    // 1. Start the quiz (This initializes visitedQuestions with [0])
     act(() => {
-      useQuizStore.getState().markAsVisited(1);
+      useQuizStore.getState().startQuiz("test@example.com");
     });
-    expect(useQuizStore.getState().visitedQuestions).toEqual([1]);
 
-    // Visit Question 1 AGAIN (Should not add duplicate)
+    // CHECK: Question 1 (index 0) should be visited by default
+    // FIX: Added the missing closing parenthesis and semicolon below
+    expect(useQuizStore.getState().visitedQuestions).toContain(0);
+
+    // 2. Visit Question 2 (index 1)
     act(() => {
       useQuizStore.getState().markAsVisited(1);
     });
-    expect(useQuizStore.getState().visitedQuestions).toHaveLength(1);
+    
+    // CHECK: Should now have [0, 1]
+    expect(useQuizStore.getState().visitedQuestions).toEqual(expect.arrayContaining([0, 1]));
+    expect(useQuizStore.getState().visitedQuestions).toHaveLength(2);
+
+    // Visit Question 2 AGAIN (Should not add duplicate)
+    act(() => {
+      useQuizStore.getState().markAsVisited(1);
+    });
+    
+    // CHECK: Length should remain 2
+    expect(useQuizStore.getState().visitedQuestions).toHaveLength(2);
   });
 
   it('should record user answers', () => {
