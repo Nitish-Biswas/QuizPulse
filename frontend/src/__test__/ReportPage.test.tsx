@@ -7,8 +7,13 @@ import { fetchQuiz } from '@/lib/api'
 
 // 1. Mock Next.js Router
 const mockPush = jest.fn();
+const mockReplace = jest.fn(); // ADDED: Mock for replace
+
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ 
+    push: mockPush,
+    replace: mockReplace // CHANGED: Added replace to prevent "not a function" error
+  }),
 }));
 
 // 2. Mock API
@@ -30,6 +35,7 @@ jest.mock('@/store/quizStore', () => ({
       ],
       userAnswers: { 0: "A" }, // Correct answer
       email: "test@example.com",
+      isFinished: true, // ADDED: Vital! Without this, the page redirects to /quiz immediately
       
       // Mock Actions
       resetQuiz: mockResetQuiz,
@@ -48,11 +54,8 @@ describe('Report Page Logic', () => {
   it('renders the score correctly', () => {
     render(<ReportPage />);
 
-    // Use getAllByText to find ALL occurrences of "1"
-    const ones = screen.getAllByText('1');
-
-    // We expect at least one of them to be in the document (the score)
-    expect(ones.length).toBeGreaterThanOrEqual(1);
+    // CHANGED: Use selector to find the exact '1' inside the span (Score) vs div (Question Number)
+    expect(screen.getByText('1', { selector: 'span' })).toBeInTheDocument();
 
     // We check that "/1" exists, which is unique to the score card
     expect(screen.getByText('/1')).toBeInTheDocument();
