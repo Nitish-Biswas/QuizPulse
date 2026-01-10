@@ -16,9 +16,10 @@ jobs:
         # Run all backend commands from the backend directory
         working-directory: ./backend
 
-    #get OPENTDB_URL from repository variables
+    #get OPENTDB_URL, FRONTEND_ORIGINS from repository variables
     env:
       OPENTDB_URL: ${{ vars.OPENTDB_URL }}
+      FRONTEND_ORIGINS: ${{ vars.FRONTEND_ORIGINS }}
 
     steps:
       - uses: actions/checkout@v3
