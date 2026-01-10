@@ -115,6 +115,6 @@ def fetch_quiz_data() -> List[QuizQuestion]:
 
         logger.error(f"❌ UNEXPECTED ERROR: {str(e)}")
         raise HTTPException(
-            status_code=500,
-            detail="Internal Server Error"
+            status_code=503,
+            detail="External Quiz Service is currently unavailable. Please try again later."
         )
