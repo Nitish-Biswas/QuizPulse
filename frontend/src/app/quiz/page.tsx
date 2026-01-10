@@ -78,8 +78,9 @@ export default function QuizPage() {
   };
 
   // Prevent UI flash while redirecting unauthorized access
-  if (questions.length === 0) return null;
-
+  if (!isMounted || questions.length === 0 || isFinished) {
+    return null; 
+  }
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
 

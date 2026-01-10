@@ -26,6 +26,9 @@ export default function ReportPage() {
   const setQuestions = useQuizStore((state) => state.setQuestions);
   const startQuiz = useQuizStore((state) => state.startQuiz);
   
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -96,6 +99,10 @@ export default function ReportPage() {
     loadingAction === "restart"
       ? "Fetching fresh questions for you..."
       : "Erasing session data...";
+
+  if (!isMounted || questions.length === 0 || !isFinished) {
+    return null; // Prevent UI flash while redirecting unauthorized access
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 py-10 px-4">
