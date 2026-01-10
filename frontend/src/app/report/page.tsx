@@ -9,6 +9,8 @@ import LoadingOverlay from "@/components/ui/LoadingOverlay";
 export default function ReportPage() {
   const router = useRouter();
 
+  const [isMounted, setIsMounted] = useState(false);
+
   // Track which async action is currently running
   // null = idle | "restart" = restarting quiz | "logout" = logging out
   const [loadingAction, setLoadingAction] =
@@ -18,17 +20,28 @@ export default function ReportPage() {
   const userAnswers = useQuizStore((state) => state.userAnswers);
   const email = useQuizStore((state) => state.email);
   const resetQuiz = useQuizStore((state) => state.resetQuiz);
+  const isFinished = useQuizStore((state) => state.isFinished);
 
   // Needed for restart flow
   const setQuestions = useQuizStore((state) => state.setQuestions);
   const startQuiz = useQuizStore((state) => state.startQuiz);
+  
 
-  // Security: If no data, kick them back to start
   useEffect(() => {
+    if (!isMounted) return;
+
+    // 1. If no data exists at all -> Go to Login
     if (questions.length === 0) {
-      router.push("/");
+      router.replace("/");
+      return;
     }
-  }, [questions, router]);
+
+    // 2. If data exists but quiz is NOT finished -> Go back to Quiz
+    // (This prevents typing /report in URL while taking the quiz)
+    if (!isFinished) {
+      router.replace("/quiz");
+    }
+  }, [isMounted, questions.length, isFinished, router]);
 
   // Calculate Score
   const score = questions.reduce((acc, question, index) => {
@@ -155,23 +168,21 @@ export default function ReportPage() {
 
                   <div className="flex-grow">
                     <h3
-                      className="text-lg font-medium text-gray-800 mb-3"
+                      className="text-lg font-medium text-gray-800 mb-4"
                       dangerouslySetInnerHTML={{ __html: q.question }}
                     />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       {/* User Answer */}
-                      <div className={`p-3 rounded-lg border ${
+                      <div className={`p-4 rounded-lg border-l-4 ${
                           isCorrect
-                            ? "bg-green-50 border-green-200"
-                            : "bg-red-50 border-red-200"
+                            ? "bg-green-50 border-green-500 border-y border-r border-y-green-100 border-r-green-100" 
+                            : "bg-red-50 border-red-500 border-y border-r border-y-red-100 border-r-red-100"
                       }`}>
-                        <span className="block text-xs font-bold uppercase mb-1 opacity-70">
+                        <span className="block text-xs font-bold uppercase text-gray-500 mb-1">
                           Your Answer
                         </span>
-                        <span className={`font-semibold ${
-                          isCorrect ? "text-green-800" : "text-red-800"
-                        }`}>
+                        <span className="text-lg font-bold text-gray-900">
                           {userAnswer || "(Skipped)"}
                         </span>
                       </div>

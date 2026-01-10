@@ -63,7 +63,7 @@ export const useQuizStore = create<QuizState>()(
 
       // ---- Review State ----
       markedQuestions: [],
-      visitedQuestions: [],
+      visitedQuestions: [0],
 
       /**
        * Populate quiz questions after fetching from backend
@@ -84,7 +84,7 @@ export const useQuizStore = create<QuizState>()(
           currentQuestionIndex: 0,
           userAnswers: {},
           markedQuestions: [],
-          visitedQuestions: [],
+          visitedQuestions: [0],
           endTime: targetEndTime,
           timeLeft: 30 * 60
         });
@@ -210,7 +210,7 @@ export const useQuizStore = create<QuizState>()(
           isFinished: false,
           email: "",
           markedQuestions: [],
-          visitedQuestions: []
+          visitedQuestions: [0]
         })
     }),
     {

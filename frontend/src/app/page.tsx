@@ -21,6 +21,7 @@ export default function Home() {
   const [email, setEmail] = useState("");      // Email used to bind quiz session
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
 
   // ---- Zustand Actions ----
   const setQuestions = useQuizStore((state) => state.setQuestions);
@@ -30,16 +31,31 @@ export default function Home() {
   const storedEmail = useQuizStore((state) => state.email);
   const isFinished = useQuizStore((state) => state.isFinished);
   const timeLeft = useQuizStore((state) => state.timeLeft);
+  const questions = useQuizStore((state) => state.questions);
 
-  // 1. SESSION RECOVERY CHECK
+  // 1. MOUNT CHECK
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // SESSION RECOVERY CHECK
   // If user refreshes, this runs on mount. 
   useEffect(() => {
-    // If we have an email AND time is left AND not finished -> Go back to Quiz
-    if (storedEmail && timeLeft > 0 && !isFinished) {
-      router.push("/quiz");
-    }
-  }, [storedEmail, timeLeft, isFinished, router]);
+    if (!isMounted) return;
 
+    // SCENARIO A: Quiz is Finished -> Go to Report
+    if (storedEmail && isFinished && questions.length > 0) {
+      router.replace("/report"); // Use replace to prevent back-button loops
+      return;
+    }
+
+    // SCENARIO B: Quiz is In Progress -> Go to Quiz
+    // (We check questions.length to ensure we actually have data to show)
+    if (storedEmail && !isFinished && questions.length > 0) {
+      router.replace("/quiz");
+      return;
+    }
+  }, [isMounted, storedEmail, isFinished, questions.length, router]);
 
   /**
    * Handler for the "Start Quiz" form submission.
@@ -80,8 +96,11 @@ export default function Home() {
     } 
   };
 
-  // Prevent hydration mismatch by returning null until check is done? 
-  // For this simple app, rendering the form is fine, the useEffect will redirect fast.
+  // Prevent flashing the form if we are about to redirect
+  if (!isMounted) return null;
+  if (storedEmail && questions.length > 0) {
+    return <LoadingOverlay isVisible={true} message="Resuming Session..." />;
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">

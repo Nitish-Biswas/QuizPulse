@@ -32,25 +32,28 @@ export default function QuestionCard() {
   return (
     <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 max-w-2xl w-full overflow-hidden">
       
-      {/* Question header & progress indicator */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-6">
-          <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">
-            Question {index + 1} of {questions.length}
+      {/* RESPONSIVE HEADER: Flex-wrap allows items to stack if needed, but justify-between keeps them apart */}
+      <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
+        <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wide">
+          Question {index + 1} of {questions.length}
+        </span>
+        
+        {/* Mark / Unmark question for review */}
+        <button 
+          onClick={() => toggleMark(index)}
+          className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+            isMarked 
+              ? "bg-yellow-100 text-yellow-700 border border-yellow-200" 
+              : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          <span>{isMarked ? "★" : "☆"}</span>
+          <span className="whitespace-nowrap">
+            {isMarked ? "Marked" : "Mark for Review"}
           </span>
+        </button>
+      </div>
 
-          {/* Mark / Unmark question for review */}
-          <button
-            onClick={() => toggleMark(index)}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-              isMarked
-                ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
-            }`}
-          >
-            {isMarked ? "★ Marked" : "☆ Mark for Review"}
-          </button>
-        </div>
 
         {/* Animated question transition */}
         <AnimatePresence mode="wait">
@@ -67,7 +70,7 @@ export default function QuestionCard() {
             />
           </motion.div>
         </AnimatePresence>
-      </div>
+      
 
       {/* Answer choices */}
       <div className="flex flex-col gap-3">

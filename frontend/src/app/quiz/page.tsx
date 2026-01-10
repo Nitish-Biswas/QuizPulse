@@ -23,6 +23,7 @@ export default function QuizPage() {
   // Local UI State
   // Used only to provide submit feedback and prevent double submission
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // ---- Global Quiz State ----
   const questions = useQuizStore((state) => state.questions);
@@ -30,16 +31,29 @@ export default function QuizPage() {
   const submitQuiz = useQuizStore((state) => state.submitQuiz);
   const email = useQuizStore((state) => state.email);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   /**
    * Security Guard:
    * If the user refreshes the page or manually navigates to /quiz
    * without initializing state, redirect back to the start page.
    */
   useEffect(() => {
+    if (!isMounted) return;
+
+    // No Data? -> Go Login
     if (questions.length === 0 || !email) {
-      router.push("/");
+      router.replace("/");
+      return;
     }
-  }, [questions, email, router]);
+
+    // Already Finished? -> Go Report (Block access to quiz)
+    if (isFinished) {
+      router.replace("/report");
+    }
+  }, [isFinished, questions.length, isMounted, router]);
 
   /**
    * Completion Handler:
@@ -73,27 +87,31 @@ export default function QuizPage() {
         <LoadingOverlay isVisible={loading} message="Submiting..." />
         
       
-      {/* HEADER: Assessment Title, Countdown Timer & Manual Submit */}
-      <header className="max-w-6xl mx-auto flex justify-between items-center mb-8 sticky top-0 bg-gray-50/90 backdrop-blur pt-4 pb-2 z-10">
+      {/* HEADER: Title, Countdown Timer & Manual Submit */}
+      <header className="max-w-6xl mx-auto flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-gray-50/95 backdrop-blur pt-2 pb-2 z-20 border-b border-gray-200 md:border-none">
         <h1 className="text-xl font-bold hidden md:block text-gray-800">
           QuizPulse
         </h1>
 
         {/* Global quiz timer */}
-        <Timer />
-
+        <div className="flex-shrink-0">
+            <Timer />
+        </div>
+          
         {/* 
           Manual submission button.
           Disabled once clicked to avoid double submission.
         */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+        <button 
+            onClick={handleSubmit} 
+            disabled={loading}
+            className="bg-red-500 hover:bg-red-600 text-white text-sm md:text-base px-5 py-2 rounded-lg font-bold transition shadow-md disabled:opacity-50 whitespace-nowrap"
         >
-            Submit Quiz
+            Submit
         </button>
+        
       </header>
+      
 
       {/* MAIN GRID LAYOUT */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
