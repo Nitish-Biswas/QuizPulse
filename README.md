@@ -136,6 +136,21 @@ npm test
 
 ---
 
+## Security & Limitations (Self-Audit)
+
+As part of the engineering design process, the following trade-offs were made to balance complexity vs. requirements:
+
+### 1. Client-Side Timer Authority
+* **Vulnerability:** The countdown timer relies on `Date.now()` from the client's machine. A malicious user could theoretically extend their time by manipulating their system clock.
+* **Production Fix:** In a real-world deployment, I would implement **Server-Side Validation**:
+    1.  Store a `started_at` timestamp in a Redis/SQL database when the user requests the first question.
+    2.  When the quiz is submitted, the server calculates `(now - started_at)`.
+    3.  If the duration exceeds 30 minutes (plus a small latency buffer), the server would reject the submission.
+* **Decision:** For this specific assignment, adding a database/session layer was deemed out of scope (YAGNI), as the goal was to demonstrate frontend/backend integration and state management.
+
+### 2. Frontend Scoring
+* **Vulnerability:** Correct answers are currently sent to the frontend to allow for instant report generation. A user could inspect the network traffic to see the answers.
+* **Production Fix:** The API should strictly receive answers (`POST /submit`) and return only the calculated score, never exposing the answer key to the client.
 
 ## Key Engineering Principles Demonstrated
 
