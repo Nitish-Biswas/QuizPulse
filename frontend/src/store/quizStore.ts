@@ -65,16 +65,21 @@ export const useQuizStore = create<QuizState>()(
        * Initialize quiz session
        * Resets state while binding quiz to a user email
        */
-      startQuiz: (email) =>
+      startQuiz: (email) => {
+        // Calculate absolute end time to survive refresh
+        const targetEndTime = Date.now() + 30 * 60 * 1000;
+
         set({
           email,
           isFinished: false,
           currentQuestionIndex: 0,
           userAnswers: {},
-          timeLeft: 30 * 60,
           markedQuestions: [],
-          visitedQuestions: [0]
-        }),
+          visitedQuestions: [0],
+          endTime: targetEndTime,
+          timeLeft: 30 * 60
+        });
+      },
 
       /**
        * Record or update an answer for a specific question
