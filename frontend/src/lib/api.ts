@@ -18,10 +18,21 @@ export const fetchQuiz = async (): Promise<QuizResponse> => {
   try {
     const res = await fetch(API_URL);
     
-    if (!res.ok) {
-      throw new Error(`Backend API Error: Status ${res.status}`);
+    // 1. Handle Rate Limiting (429)
+    if (res.status === 429) {
+      throw new Error("Too many attempts. Please try again in 30 seconds.");
     }
-    
+
+    // 2. Handle Service Unavailable (503)
+    if (res.status === 503) {
+      throw new Error("Service unavailable. Please try again after some time.");
+    }
+
+    // 3. Handle Generic Errors
+    if (!res.ok) {
+      throw new Error(`Server Error (${res.status}). Please try again later.`);
+    }
+
     const data: QuizResponse = await res.json();
     return data;
   } catch (error) {

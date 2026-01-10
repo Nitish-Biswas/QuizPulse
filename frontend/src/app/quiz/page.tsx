@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuizStore } from "@/store/quizStore";
 import Timer from "@/components/Timer";
 import QuestionCard from "@/components/QuestionCard";
 import QuizNavigation from "@/components/QuizNavigation";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 /**
  * QuizPage
@@ -19,11 +20,20 @@ import QuizNavigation from "@/components/QuizNavigation";
 export default function QuizPage() {
   const router = useRouter();
 
+  // Local UI State
+  // Used only to provide submit feedback and prevent double submission
+  const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
   // ---- Global Quiz State ----
   const questions = useQuizStore((state) => state.questions);
   const isFinished = useQuizStore((state) => state.isFinished);
   const submitQuiz = useQuizStore((state) => state.submitQuiz);
   const email = useQuizStore((state) => state.email);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   /**
    * Security Guard:
@@ -31,10 +41,19 @@ export default function QuizPage() {
    * without initializing state, redirect back to the start page.
    */
   useEffect(() => {
+    if (!isMounted) return;
+
+    // No Data? -> Go Login
     if (questions.length === 0 || !email) {
-      router.push("/");
+      router.replace("/");
+      return;
     }
-  }, [questions, email, router]);
+
+    // Already Finished? -> Go Report (Block access to quiz)
+    if (isFinished) {
+      router.replace("/report");
+    }
+  }, [isFinished, questions.length, isMounted, router]);
 
   /**
    * Completion Handler:
@@ -47,29 +66,52 @@ export default function QuizPage() {
     }
   }, [isFinished, router]);
 
+  /**
+   * Handle manual quiz submission.
+   * Sets a temporary loading state to:
+   * - Prevent multiple clicks
+   * - Give immediate visual feedback
+   */
+  const handleSubmit = () => {
+    setLoading(true);
+    submitQuiz();
+  };
+
   // Prevent UI flash while redirecting unauthorized access
   if (questions.length === 0) return null;
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+
+        {/* Full Screen Loading Overlay */}
+        <LoadingOverlay isVisible={loading} message="Submiting..." />
+        
       
-      {/* HEADER: Assessment Title, Countdown Timer & Manual Submit */}
-      <header className="max-w-6xl mx-auto flex justify-between items-center mb-8 sticky top-0 bg-gray-50/90 backdrop-blur pt-4 pb-2 z-10">
+      {/* HEADER: Title, Countdown Timer & Manual Submit */}
+      <header className="max-w-6xl mx-auto flex justify-between items-center mb-6 md:mb-8 sticky top-0 bg-gray-50/95 backdrop-blur pt-2 pb-2 z-20 border-b border-gray-200 md:border-none">
         <h1 className="text-xl font-bold hidden md:block text-gray-800">
-          CausalFunnel Assessment
+          QuizPulse
         </h1>
 
         {/* Global quiz timer */}
-        <Timer />
-
-        {/* Manual submission control */}
-        <button
-          onClick={submitQuiz}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold transition shadow-md"
+        <div className="flex-shrink-0">
+            <Timer />
+        </div>
+          
+        {/* 
+          Manual submission button.
+          Disabled once clicked to avoid double submission.
+        */}
+        <button 
+            onClick={handleSubmit} 
+            disabled={loading}
+            className="bg-red-500 hover:bg-red-600 text-white text-sm md:text-base px-5 py-2 rounded-lg font-bold transition shadow-md disabled:opacity-50 whitespace-nowrap"
         >
-          Submit Quiz
+            Submit
         </button>
+        
       </header>
+      
 
       {/* MAIN GRID LAYOUT */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
