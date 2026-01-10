@@ -17,6 +17,10 @@ interface QuizState {
   isFinished: boolean;                      // Quiz completion flag
   email: string;                            // User email (quiz identifier)
 
+  // --- Navigation & Review State ---
+  markedQuestions: number[];                // Questions marked for review
+  visitedQuestions: number[];               // Questions that have been visited
+
   // ---- Actions ----
   setQuestions: (questions: QuizQuestion[]) => void;
   startQuiz: (email: string) => void;
@@ -27,6 +31,10 @@ interface QuizState {
   tickTimer: () => void;
   submitQuiz: () => void;
   resetQuiz: () => void;
+
+  // ---- Review Actions ----
+  toggleMarkForReview: (index: number) => void;
+  markAsVisited: (index: number) => void;
 }
 
 /**
@@ -44,6 +52,10 @@ export const useQuizStore = create<QuizState>()(
       isFinished: false,
       email: "",
 
+      // ---- Review State ----
+      markedQuestions: [],
+      visitedQuestions: [],
+
       /**
        * Populate quiz questions after fetching from backend
        */
@@ -59,7 +71,9 @@ export const useQuizStore = create<QuizState>()(
           isFinished: false,
           currentQuestionIndex: 0,
           userAnswers: {},
-          timeLeft: 30 * 60
+          timeLeft: 30 * 60,
+          markedQuestions: [],
+          visitedQuestions: []
         }),
 
       /**
@@ -99,8 +113,11 @@ export const useQuizStore = create<QuizState>()(
        * Jump directly to a specific question
        * Used by question overview panel
        */
-      jumpToQuestion: (index) =>
-        set({ currentQuestionIndex: index }),
+      jumpToQuestion: (index) => {
+        // Mark question as visited when jumping
+        get().markAsVisited(index);
+        set({ currentQuestionIndex: index });
+      },
 
       /**
        * Decrement quiz timer every second
@@ -125,6 +142,28 @@ export const useQuizStore = create<QuizState>()(
       submitQuiz: () => set({ isFinished: true }),
 
       /**
+       * Toggle mark/unmark a question for review
+       */
+      toggleMarkForReview: (index) =>
+        set((state) => {
+          const isMarked = state.markedQuestions.includes(index);
+          return {
+            markedQuestions: isMarked
+              ? state.markedQuestions.filter((i) => i !== index)
+              : [...state.markedQuestions, index]
+          };
+        }),
+
+      /**
+       * Mark a question as visited (idempotent)
+       */
+      markAsVisited: (index) =>
+        set((state) => {
+          if (state.visitedQuestions.includes(index)) return {};
+          return { visitedQuestions: [...state.visitedQuestions, index] };
+        }),
+
+      /**
        * Fully reset quiz state
        * Useful for restarting or leaving the session
        */
@@ -135,7 +174,9 @@ export const useQuizStore = create<QuizState>()(
           currentQuestionIndex: 0,
           timeLeft: 30 * 60,
           isFinished: false,
-          email: ""
+          email: "",
+          markedQuestions: [],
+          visitedQuestions: []
         })
     }),
     {
