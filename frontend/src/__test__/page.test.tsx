@@ -8,6 +8,7 @@ jest.mock('next/navigation', () => ({
   useRouter() {
     return {
       push: jest.fn(),
+      replace: jest.fn(), 
     };
   },
 }));
@@ -21,6 +22,9 @@ jest.mock('@/lib/api', () => ({
 jest.mock('@/store/quizStore', () => ({
   useQuizStore: (selector: any) => {
     const state = {
+      questions: [], 
+      isFinished: false,
+      email: '',
       setQuestions: jest.fn(),
       startQuiz: jest.fn(),
     };
