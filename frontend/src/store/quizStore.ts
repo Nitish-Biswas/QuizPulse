@@ -13,7 +13,11 @@ interface QuizState {
   questions: QuizQuestion[];                // List of quiz questions
   userAnswers: Record<number, string>;      // Map: questionIndex -> selected answer
   currentQuestionIndex: number;             // Currently active question
-  timeLeft: number;                         // Remaining time in seconds
+
+  // --- Timer State ---
+  endTime: number | null;                   // Absolute quiz end timestamp (ms)
+  timeLeft: number;                         // Remaining time in seconds (UI-friendly)
+
   isFinished: boolean;                      // Quiz completion flag
   email: string;                            // User email (quiz identifier)
 
@@ -29,6 +33,7 @@ interface QuizState {
   prevQuestion: () => void;
   jumpToQuestion: (index: number) => void;
   tickTimer: () => void;
+  syncTimer: () => void;                    // Sync timer on refresh/reload
   submitQuiz: () => void;
   resetQuiz: () => void;
 
@@ -48,7 +53,11 @@ export const useQuizStore = create<QuizState>()(
       questions: [],
       userAnswers: {},
       currentQuestionIndex: 0,
-      timeLeft: 30 * 60, // 30-minute quiz duration
+
+      // --- Timer ---
+      endTime: null,                        // Initially unset
+      timeLeft: 30 * 60,                    // 30-minute quiz duration
+
       isFinished: false,
       email: "",
 
@@ -86,10 +95,7 @@ export const useQuizStore = create<QuizState>()(
        */
       answerQuestion: (idx, answer) =>
         set((state) => ({
-          userAnswers: {
-            ...state.userAnswers,
-            [idx]: answer
-          }
+          userAnswers: { ...state.userAnswers, [idx]: answer }
         })),
 
       /**
@@ -126,18 +132,40 @@ export const useQuizStore = create<QuizState>()(
 
       /**
        * Decrement quiz timer every second
-       * Automatically finishes quiz when time expires
+       * Uses absolute endTime instead of local countdown
        */
       tickTimer: () => {
-        const { timeLeft, isFinished } = get();
+        const { endTime, isFinished } = get();
+        if (!endTime || isFinished) return;
 
-        // Prevent timer updates after quiz completion
-        if (isFinished) return;
+        const secondsRemaining = Math.max(
+          0,
+          Math.floor((endTime - Date.now()) / 1000)
+        );
 
-        if (timeLeft <= 1) {
+        if (secondsRemaining <= 0) {
           set({ isFinished: true, timeLeft: 0 });
         } else {
-          set({ timeLeft: timeLeft - 1 });
+          set({ timeLeft: secondsRemaining });
+        }
+      },
+
+      /**
+       * Sync timer on page reload to prevent cheating via refresh
+       */
+      syncTimer: () => {
+        const { endTime, isFinished } = get();
+        if (!endTime || isFinished) return;
+
+        const secondsRemaining = Math.max(
+          0,
+          Math.floor((endTime - Date.now()) / 1000)
+        );
+
+        if (secondsRemaining <= 0) {
+          set({ isFinished: true, timeLeft: 0 });
+        } else {
+          set({ timeLeft: secondsRemaining });
         }
       },
 
@@ -178,6 +206,7 @@ export const useQuizStore = create<QuizState>()(
           userAnswers: {},
           currentQuestionIndex: 0,
           timeLeft: 30 * 60,
+          endTime: null,                     // Clear absolute timer
           isFinished: false,
           email: "",
           markedQuestions: [],

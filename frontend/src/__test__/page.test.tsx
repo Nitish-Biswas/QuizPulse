@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import Home from '../app/page'
+import { fetchQuiz } from '@/lib/api'
 
 // Mock the useRouter hook to prevent errors during testing
 jest.mock('next/navigation', () => ({
@@ -46,4 +47,28 @@ describe('Home Page', () => {
     
     expect(emailInput).toBeInTheDocument()
   })
+
+  it('displays specific error message from backend when API fails', async () => {
+    // 1. Mock the API to throw a specific error (like 429 or 503)
+    const errorMessage = "Service unavailable. Please try again after some time.";
+    (fetchQuiz as jest.Mock).mockRejectedValue(new Error(errorMessage));
+
+    render(<Home />);
+
+    // 2. Fill out the form
+    const emailInput = screen.getByPlaceholderText(/intern@example.com/i);
+    fireEvent.change(emailInput, { target: { value: 'test@error.com' } });
+
+    // 3. Click Start
+    const startBtn = screen.getByRole('button', { name: /Start Quiz/i });
+    fireEvent.click(startBtn);
+
+    // 4. Verify the error appears on screen
+    // We use waitFor because state updates are async
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Service unavailable\. Please try again after some time\./i)
+      ).toBeInTheDocument();
+    });
+  });
 })

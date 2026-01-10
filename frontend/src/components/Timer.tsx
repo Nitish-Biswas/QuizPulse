@@ -17,7 +17,19 @@ export default function Timer() {
   // Select only required slices to prevent unnecessary re-renders
   const timeLeft = useQuizStore((state) => state.timeLeft);
   const tickTimer = useQuizStore((state) => state.tickTimer);
+  const syncTimer = useQuizStore((state) => state.syncTimer); // Sync timer on mount
   const isFinished = useQuizStore((state) => state.isFinished);
+
+  /**
+   * Initial timer synchronization
+   * Ensures timer reflects real remaining time after:
+   * - Page refresh
+   * - Tab close/reopen
+   * - System sleep
+   */
+  useEffect(() => {
+    syncTimer();
+  }, [syncTimer]);
 
   /**
    * Timer lifecycle management
