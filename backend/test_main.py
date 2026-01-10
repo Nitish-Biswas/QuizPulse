@@ -5,7 +5,7 @@ client = TestClient(app)
 
 def test_health_check():
     """Ensure the API is up and running."""
-    response = client.get("/")
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "message": "Backend is running"}
 
