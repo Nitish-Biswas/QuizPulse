@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuizPulse Frontend
 
-## Getting Started
+This directory contains the client-side application for QuizPulse, built with **Next.js 16** (App Router) and **TypeScript**. It handles the quiz interface, state management, and results visualization.
 
-First, run the development server:
+## Tech Stack
+
+*   **Framework:** Next.js 16 (React 19)
+*   **Language:** TypeScript
+*   **Styling:** Tailwind CSS
+*   **State Management:** Zustand (with persistence)
+*   **Animations:** Framer Motion
+*   **Testing:** Jest, React Testing Library
+
+## Directory Structure
+
+```
+frontend/
+├── src/
+│   ├── app/          # Next.js App Router pages and layouts
+│   ├── components/   # Reusable UI components
+│   ├── store/        # Zustand state management stores
+│   ├── types/        # TypeScript type definitions
+│   └── lib/          # Utility functions and constants
+├── public/           # Static assets
+├── jest.config.js    # Jest configuration
+└── package.json      # Dependencies and scripts
+```
+
+## Setup & Installation
+
+### 1. Prerequisites
+Ensure you have **Node.js 18+** installed.
+
+### 2. Environment Variables
+Create a `.env.local` file in this directory:
+
+```ini
+# frontend/.env.local
+
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/quiz
+```
+
+### 3. Installation
+
+```bash
+npm install
+```
+
+## Running the Application
+
+### Development
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+### Production Build
+Build and start the production version:
+
+```bash
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run unit and integration tests:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+```
 
-## Learn More
+To run tests in watch mode:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run test:watch
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Key Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*   **Zustand Store:** Manages quiz state (current question, answers, timer) and persists it to `localStorage` to prevent data loss on refresh.
+*   **BFF Integration:** Consumes sanitised data from the FastAPI backend.
+*   **Responsive Design:** Fully responsive layout built with Tailwind CSS.
