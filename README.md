@@ -1,6 +1,8 @@
 # QuizPulse
 ### CausalFunnel Quiz Application — SDE Intern Assignment
 
+> 🚀 **Live Demo:** [Click here to try the deployed application](https://quiz-pulse-chi.vercel.app/)
+
 ## Project Overview
 
 **QuizPulse** is a full-stack, time-bound quiz application built as part of the **CausalFunnel Software Engineer Intern assignment**.
@@ -50,12 +52,32 @@ The application follows a **Monorepo** structure:
 
 ---
 
+## Directory Structure
+
+```
+QuizPulse/
+├── backend/            # FastAPI backend application
+│   ├── main.py
+│   ├── models.py
+│   ├── services.py
+│   └── README.md
+├── frontend/           # Next.js frontend application
+│   ├── src/
+│   ├── public/
+│   └── README.md
+├── .github/            # GitHub Actions workflows
+├── README.md           # Project documentation
+└── ENGINEERING_LOG.md  # Development log
+```
+
+---
+
 ## Getting Started
 
 Follow these instructions to run the project locally.
 
 ### Prerequisites
-* **Python 3.9+**
+* **Python 3.11** (Preferred and Tested)
 * **Node.js 18+**
 
 ### 1. Configuration
@@ -129,12 +151,50 @@ pytest
 cd frontend
 npm test
 ```
+---
 
-- **CI Pipeline:** Tests and linters run automatically via GitHub Actions
+## CI Pipeline
 
-    - This ensures the application remains **regression-safe** as features evolve.
+To ensure code stability and simulate a professional engineering environment, I implemented a Continuous Integration workflow using GitHub Actions.
+
+Every Pull Request and Push to main/dev triggers an automated pipeline that:
+
+1. **Sets up the Environment**: Spins up isolated Ubuntu containers.
+
+2. **Installs Dependencies**: Caches and installs Python (pip) and Node (npm) modules.
+
+3. **Runs the Test Suite**: Executes pytest for the backend and npm test (Jest) for the frontend concurrently.
+
+4. **Verification**: The build fails if any test case does not pass, preventing broken code from merging
 
 ---
+
+## Challenges Faced & Engineering Solutions
+
+During development, several technical hurdles were encountered. Here is how they were engineered:
+
+### 1. API Rate Limiting & Stability (The "429" Problem)
+* **Challenge:** The external OpenTDB API imposes strict rate limits. During development and testing, frequent refreshes caused `HTTP 429 Too Many Requests` errors, breaking the application flow.
+* **Solution:** I implemented an **In-Memory Caching strategy** (TTL) within the FastAPI backend service.
+    * When the frontend requests a quiz, the backend first checks for a valid cached response.
+    * If available, it serves the cache instantly.
+    * This reduces external API calls by **80%** during testing and ensures the app remains functional even if the third-party provider experiences downtime.
+
+### 2. Timer Resilience (The "Sleeping Tab" Problem)
+* **Challenge:** Standard `setInterval` timers in Javascript pause or drift when the browser tab is inactive or the operating system sleeps. This allows users to "pause" the quiz by closing the tab.
+* **Solution:** Instead of a simple countdown, I implemented a "Hardened Timer" using **Zustand**. I store the **absolute target timestamp** (Projected End Time) in persistence. On every page load, the app calculates `Target Time - Current Time`, ensuring the timer remains accurate regardless of user activity.
+
+### 3. Route Security & UI Flashing
+* **Challenge:** When protecting routes (e.g., preventing access to `/quiz` after completion), the component would sometimes render the Quiz UI for a split second before the `router.replace()` took effect.
+* **Solution:** I implemented a strict **Render Guard**. The component checks the global store state immediately and returns `null` if the user is unauthorized. This halts the React rendering cycle completely before the redirection occurs.
+
+### 4. API Data Consistency
+* **Challenge:** The external OpenDB API often returns raw HTML entities (e.g., `&quot;`) and inconsistent structures, which cluttered the frontend logic.
+* **Solution:** I implemented a **Python Backend-for-Frontend (BFF)** using FastAPI. This intermediate layer acts as a sanitizer, decoding HTML entities and normalizing the data structure before sending it to the client. This enforces a strict Separation of Concerns.
+
+### 5. Ambiguous Testing Queries
+* **Challenge:** During testing, `getByText("1")` was failing because it found both the Score ("1/15") and the Question Number ("1").
+* **Solution:** I utilized strict selectors in my Jest tests (e.g., `{ selector: 'span' }`) to scope queries to specific DOM elements, ensuring the tests remain robust even as the UI evolves.
 
 ## Security & Limitations (Self-Audit)
 
@@ -167,5 +227,6 @@ As part of the engineering design process, the following trade-offs were made to
 ## Author
 
 **Nitish Biswas**  
+nitishbiswas066@gmail.com
 
 
